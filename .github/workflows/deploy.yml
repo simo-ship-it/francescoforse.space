@@ -1,9 +1,10 @@
-name: Build & Deploy (GitHub Pages)
+# .github/workflows/deploy.yml
+name: Build & Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]     # ogni push su main = deploy
-  workflow_dispatch:     # lancio manuale
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-deploy:
@@ -16,10 +17,10 @@ jobs:
       with:
         node-version: 20
 
-    - name: Install & build
+    - name: Install deps & build
       run: |
         npm ci
-        npm run deploy      # build + export => ./out
+        npm run deploy   # crea ./out
 
     - name: Publish to gh-pages
       uses: peaceiris/actions-gh-pages@v4
@@ -27,4 +28,3 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./out
         publish_branch: gh-pages
-        cname: francescoforse.space   # crea/aggiorna il CNAME :contentReference[oaicite:1]{index=1}

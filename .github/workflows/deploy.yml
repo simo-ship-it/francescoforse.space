@@ -1,0 +1,30 @@
+name: Build & Deploy (GitHub Pages)
+
+on:
+  push:
+    branches: [main]     # ogni push su main = deploy
+  workflow_dispatch:     # lancio manuale
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install & build
+      run: |
+        npm ci
+        npm run deploy      # build + export => ./out
+
+    - name: Publish to gh-pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./out
+        publish_branch: gh-pages
+        cname: francescoforse.space   # crea/aggiorna il CNAME :contentReference[oaicite:1]{index=1}

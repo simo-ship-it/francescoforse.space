@@ -14,10 +14,7 @@ export default function ModelComponent() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <Canvas>
-        <ambientLight intensity={0.3} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <pointLight position={[-5, -5, -5]} intensity={0.5} />
-        <hemisphereLight skyColor={'blue'} groundColor={'green'} intensity={0.6} />
+        <ambientLight intensity={0.5} />
         <Suspense fallback={null}>
           <Model />
         </Suspense>

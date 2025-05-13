@@ -2,14 +2,11 @@
 "use client";
 
 /** *********************************************************************
- * ModelComponent
+ * ModelComponent (angolo iniziale 45°)
  * ------------------------------------------------------------
- * ✔ Carica un modello GLB, spegne le luci interne, rende i materiali
- *   metallici/lucidi e mostra un loader durante il download.
- * ✔ Il percorso del file è calcolato dinamicamente così funziona sia
- *   in locale che in produzione (basePath, sottocartelle, ecc.).
- * ✔ Niente commenti "//" dentro il JSX → nessun errore ESLint
- *   (react/jsx‑no‑comment‑textnodes).
+ * Carica il modello, spegne luci interne, applica materiali metallici,
+ * mostra un loader e imposta la camera iniziale su un angolo di 45°
+ * lungo l'asse Y (vista 3/4) invece che frontale.
  ***********************************************************************/
 
 import React, { Suspense, useEffect } from 'react';
@@ -22,32 +19,26 @@ import {
 } from '@react-three/drei';
 
 //──────────────────────────────────────────────────────────────────────────
-// 1. Percorso GLB robusto (gestisce eventuale basePath in next.config.js)
-//    Esempio: se basePath = '/portfolio', MODEL_URL diventa '/portfolio/model.glb'
+// Percorso GLB
 //──────────────────────────────────────────────────────────────────────────
 const MODEL_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/model.glb`;
-
-// Pre‑download in background non appena possibile
 useGLTF.preload(MODEL_URL);
 
 //──────────────────────────────────────────────────────────────────────────
-// 2. Component: Model
+// Component: Model
 //──────────────────────────────────────────────────────────────────────────
 function Model() {
   const { scene } = useGLTF(MODEL_URL);
 
   useEffect(() => {
     scene.traverse((obj) => {
-      // Spegne luci esportate dal programma di modellazione
       if (obj.isLight) obj.visible = false;
-
-      // Rende qualsiasi materiale metallico e lucido
       if (obj.isMesh && obj.material) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
         mats.forEach((mat) => {
-          if ('metalness' in mat) mat.metalness = 1;
-          if ('roughness' in mat) mat.roughness = 0.05;
-          if ('envMapIntensity' in mat) mat.envMapIntensity = 2;
+          if ("metalness" in mat) mat.metalness = 1;
+          if ("roughness" in mat) mat.roughness = 0.05;
+          if ("envMapIntensity" in mat) mat.envMapIntensity = 2;
           mat.needsUpdate = true;
         });
       }
@@ -58,7 +49,7 @@ function Model() {
 }
 
 //──────────────────────────────────────────────────────────────────────────
-// 3. Loader (spinner centrato)
+// Loader
 //──────────────────────────────────────────────────────────────────────────
 function Loader() {
   return (
@@ -89,30 +80,30 @@ function Loader() {
 }
 
 //──────────────────────────────────────────────────────────────────────────
-// 4. ModelComponent wrapper
+// ModelComponent wrapper con camera a 45°
 //──────────────────────────────────────────────────────────────────────────
 export default function ModelComponent() {
+  // Coordinate camera: distanza 5, angolo 45° => x = 3.535, z = 3.535
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: "100vw", height: "100vh" }}>
       <Canvas
         shadows
         dpr={[1, 2]}
-        camera={{ position: [0, 1, 5], fov: 60 }}
+        camera={{ position: [-3.1, -0.4, 3.535], fov: 60 }}
       >
-        {/* HDRI ambiente per riflessi metallo */}
+        {/* Ambiente HDRI per riflessi metallico */}
         <Environment preset="city" />
 
-        {/* Luci da studio -------------------------------------------------*/}
+        {/* Luci da studio */}
         <pointLight position={[0, -2, 3]} intensity={8} distance={25} castShadow />
         <pointLight position={[2, 2, 3]} intensity={2.5} distance={25} castShadow />
         <pointLight position={[2, 1, -2]} intensity={1.5} distance={25} castShadow />
 
-        {/* Modello 3D dentro React.Suspense ------------------------------*/}
         <Suspense fallback={<Loader />}>
           <Model />
         </Suspense>
 
-        {/* Controlli orbitali con damping -------------------------------*/}
+        {/* OrbitControls con damping e target al centro */}
         <OrbitControls enableDamping />
       </Canvas>
     </div>
